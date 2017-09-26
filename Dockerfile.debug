@@ -1,13 +1,29 @@
-FROM microsoft/dotnet:1.0.0-preview2-sdk
+FROM microsoft/dotnet:1.1.4-sdk
 ENV NUGET_XMLDOC_MODE skip
 ARG CLRDBG_VERSION=VS2015U2
-WORKDIR /clrdbg
-RUN curl -SL https://raw.githubusercontent.com/Microsoft/MIEngine/getclrdbg-release/scripts/GetClrDbg.sh --output GetClrDbg.sh \
-    && chmod 700 GetClrDbg.sh \
-    && ./GetClrDbg.sh $CLRDBG_VERSION \
-    && rm GetClrDbg.sh
-WORKDIR /app
-ENV ASPNETCORE_URLS http://*:5000
+#WORKDIR /clrdbg
+#RUN apt-get update && apt-get install -y telnet && apt-get install -y net-tools
+#RUN curl -SL https://raw.githubusercontent.com/Microsoft/MIEngine/getclrdbg-release/scripts/GetClrDbg.sh --output GetClrDbg.sh \
+#    && chmod 700 GetClrDbg.sh \
+#    && ./GetClrDbg.sh $CLRDBG_VERSION \
+#    && rm GetClrDbg.sh
+
 EXPOSE 5000
-ENTRYPOINT ["/bin/bash", "-c", "if [ -z \"$REMOTE_DEBUGGING\" ]; then dotnet aspnetAngular.dll; else sleep infinity; fi"]
-COPY . /app
+ENV APP_HOME /app
+ENV ASPNETCORE_URLS http://+:5000
+RUN mkdir -p /app
+WORKDIR /app
+ADD . /app
+RUN rm -rf /app/obj && rm -rf /app/bin
+RUN dotnet restore
+
+#RUN dotnet publish -c Release -o /app/out
+#COPY --from=build-env /app/out .
+#ENTRYPOINT ["/bin/bash", "-c", "if [ -z \"$REMOTE_DEBUGGING\" ]; then dotnet aspnetAngular.dll; else sleep infinity; fi"]
+
+
+RUN dotnet publish -c Release -o out
+#ENTRYPOINT ["dotnet", "out/aspnetAngular.dll"]
+#CMD ["dotnet", "out/aspnetAngular.dll"]
+CMD ["dotnet","run"]
+#docker run  -it -p 5000:5000 c6d0ee14809c

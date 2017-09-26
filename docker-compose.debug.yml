@@ -1,5 +1,4 @@
-version: '2'
-
+version: '3'
 services:
   aspnetangular:
     image: aspnetangular:debug
@@ -7,6 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile.debug
     ports:
-      - "5000:5000"
+      - 127.0.0.1:5000:5000
     environment:
       - REMOTE_DEBUGGING
+    volumes:
+      - ./:/app
